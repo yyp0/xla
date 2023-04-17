@@ -52,6 +52,7 @@
 #include "torch_xla/csrc/ops/xla_ops.h"
 #include "torch_xla/csrc/tensor_util.h"
 #include "torch_xla/csrc/torch_util.h"
+#include "torch_xla/csrc/xla_auto_sharding.h"
 #include "torch_xla/csrc/xla_backend_impl.h"
 #include "torch_xla/csrc/xla_sharding_util.h"
 
@@ -1174,6 +1175,14 @@ XLAGraphExecutor::CompilationResult XLAGraphExecutor::Compile(
   }
 
   xla::XlaComputation computation = ConsumeValue(lowering_ctx.BuildXla());
+
+  static const bool auto_sharding =
+      xla::sys_util::GetEnvBool("AUTO_SHARDING", true);
+  if (auto_sharding) {
+    auto hlo_proto = AutoShardingRunner().Run(computation);
+    computation = xla::XlaComputation(hlo_proto);
+  }
+
   xla::ProgramShape program_shape = ConsumeValue(computation.GetProgramShape());
 
   bool should_wrap_parameter =

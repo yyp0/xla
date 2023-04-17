@@ -55,17 +55,35 @@ class HloMetadataSetter {
           absl::StrCat(absl::StrReplaceAll(nmeta.scope, {{":", "_"}}), "/");
     }
     metadata.set_op_name(absl::StrCat(op_name_prefix, op_type));
+    const bool verbose_ir = xla::sys_util::GetEnvBool("VERBOSE_IR", false);
 
     if (!nmeta.frame_info.empty()) {
-      const torch::lazy::SourceLocation& frame = nmeta.frame_info.front();
-      std::string::size_type pos = frame.file.find_last_of('/');
-      if (pos == std::string::npos) {
-        pos = 0;
+      if (verbose_ir) {
+        std::vector<std::string> source_files;
+        for (auto frame : nmeta.frame_info) {
+          auto pos = frame.file.find_last_of('/');
+          if (pos == std::string::npos) {
+            pos = 0;
+          } else {
+            ++pos;
+          }
+          source_files.emplace_back(frame.function + "@" +
+                                    frame.file.substr(pos) + ":" +
+                                    std::to_string(frame.line));
+        }
+        metadata.set_source_file(absl::StrJoin(source_files, "|"));
+        metadata.set_source_line(0);
       } else {
-        ++pos;
+        const torch::lazy::SourceLocation& frame = nmeta.frame_info.front();
+        std::string::size_type pos = frame.file.find_last_of('/');
+        if (pos == std::string::npos) {
+          pos = 0;
+        } else {
+          ++pos;
+        }
+        metadata.set_source_file(frame.function + "@" + frame.file.substr(pos));
+        metadata.set_source_line(frame.line);
       }
-      metadata.set_source_file(frame.function + "@" + frame.file.substr(pos));
-      metadata.set_source_line(frame.line);
     }
     loctx->builder()->SetOpMetadata(std::move(metadata));
   }

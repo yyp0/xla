@@ -96,12 +96,11 @@ PjRtComputationClient::PjRtComputationClient() {
         MaybeInitializeDistributedRuntimeClient(local_rank, dist_service_addr);
     auto allowed_devices =
         std::make_optional<std::set<int>>(std::set{local_rank});
-    client_ =
-        std::move(xla::GetStreamExecutorGpuClient(
-                      /*asynchronous=*/async, GpuAllocatorConfig{},
-                      /*distributed_client=*/distributed_client,
-                      /*node_id=*/local_rank, allowed_devices = allowed_devices)
-                      .value());
+    client_ = std::move(xla::GetStreamExecutorGpuClient(
+                            /*asynchronous=*/async, GpuAllocatorConfig{},
+                            /*distributed_client=*/nullptr,
+                            /*node_id=*/0)
+                            .value());
   } else {
     XLA_ERROR() << absl::StrFormat("Unknown %s '%s'", env::kEnvPjRtDevice,
                                    device_type);
@@ -169,9 +168,8 @@ std::optional<xla::OpSharding> PjRtComputationClient::GetDataSharding(
 std::vector<ComputationClient::DataPtr> PjRtComputationClient::TransferToServer(
     absl::Span<const TensorSource> tensors) {
   metrics::TimedSection timed(TransferToServerMetric());
-  tsl::profiler::TraceMe activity(
-      "PjRtComputationClient::TransferToServer",
-      tsl::profiler::TraceMeLevel::kInfo);
+  tsl::profiler::TraceMe activity("PjRtComputationClient::TransferToServer",
+                                  tsl::profiler::TraceMeLevel::kInfo);
   std::vector<ComputationClient::DataPtr> datas;
   datas.reserve(tensors.size());
   int64_t total_size = 0;
@@ -227,9 +225,8 @@ ComputationClient::DataPtr PjRtComputationClient::TransferShardsToServer(
 
 ComputationClient::DataPtr PjRtComputationClient::CopyToDevice(
     ComputationClient::DataPtr data, std::string dst) {
-  tsl::profiler::TraceMe activity(
-      "PjRtComputationClient::CopyToDevice",
-      tsl::profiler::TraceMeLevel::kInfo);
+  tsl::profiler::TraceMe activity("PjRtComputationClient::CopyToDevice",
+                                  tsl::profiler::TraceMeLevel::kInfo);
   const PjRtData* pjrt_data = dynamic_cast<PjRtData*>(data.get());
   XLA_CHECK(pjrt_data->HasValue()) << "Can't copy invalid device data.";
 
@@ -299,9 +296,8 @@ ComputationClient::DataPtr PjRtComputationClient::ReplicateShardedData(
 std::vector<xla::Literal> PjRtComputationClient::TransferFromServer(
     absl::Span<const DataPtr> handles) {
   metrics::TimedSection timed(TransferFromServerMetric());
-  tsl::profiler::TraceMe activity(
-      "PjRtComputationClient::TransferFromServer",
-      tsl::profiler::TraceMeLevel::kInfo);
+  tsl::profiler::TraceMe activity("PjRtComputationClient::TransferFromServer",
+                                  tsl::profiler::TraceMeLevel::kInfo);
   std::vector<xla::Literal> literals;
   literals.reserve(handles.size());
   int64_t total_size = 0;
@@ -344,9 +340,8 @@ std::vector<xla::Literal> PjRtComputationClient::TransferFromServer(
 std::vector<ComputationClient::ComputationPtr> PjRtComputationClient::Compile(
     std::vector<ComputationClient::CompileInstance> instances) {
   metrics::TimedSection timed(CompileMetric());
-  tsl::profiler::TraceMe activity(
-      "PjRtComputationClient::Compile",
-      tsl::profiler::TraceMeLevel::kInfo);
+  tsl::profiler::TraceMe activity("PjRtComputationClient::Compile",
+                                  tsl::profiler::TraceMeLevel::kInfo);
   std::vector<ComputationClient::ComputationPtr> computations;
 
   for (auto& instance : instances) {
@@ -416,9 +411,8 @@ PjRtComputationClient::ExecuteComputation(
   // once both `ExecuteComputation` and the async work in `ExecuteSharded` are
   // complete; a copy is held from the lambda that releases it when done.
   auto timed = std::make_shared<metrics::TimedSection>(ExecuteMetric());
-  tsl::profiler::TraceMe activity(
-      "PjRtComputationClient::ExecuteComputation",
-      tsl::profiler::TraceMeLevel::kInfo);
+  tsl::profiler::TraceMe activity("PjRtComputationClient::ExecuteComputation",
+                                  tsl::profiler::TraceMeLevel::kInfo);
   TF_VLOG(1) << "Executing PjRt computation on " << device;
   const PjRtComputation& pjrt_computation =
       dynamic_cast<const PjRtComputation&>(computation);

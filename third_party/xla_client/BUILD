@@ -483,6 +483,7 @@ tf_cc_shared_object(
         "@org_tensorflow//tensorflow/compiler/xla/client:xla_builder",
         "@org_tensorflow//tensorflow/compiler/xla/client:xla_computation",
         "@org_tensorflow//tensorflow/compiler/xla/client/lib:svd",
+        "@org_tensorflow//tensorflow/compiler/xla/hlo/experimental/auto_sharding",
         "@org_tensorflow//tensorflow/compiler/xla/rpc:grpc_stub",
         "@org_tensorflow//tensorflow/core:lib",
         "@org_tensorflow//tensorflow/tsl/platform/cloud:gcs_file_system",
