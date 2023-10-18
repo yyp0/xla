@@ -30,6 +30,16 @@ extern const char* const kEnvNeuronLibraryPath;
 extern const char* const kEnvPjrtDistServiceAddr;
 extern const char* const kEnvPjRtLocalProcessCount;
 extern const char* const kEnvPjRtLocalRank;
+extern const char* const kEnvPjrtMasterAddr;
+extern const char* const kEnvPjrtMasterPort;
+extern const char* const kEnvPjrtWorldSize;
+extern const char* const kEnvPjrtLocalRank;
+extern const char* const kEnvPjrtRank;
+
+
+extern const char* const kEnvPjrtAllocatorCudaAsync;
+extern const char* const kEnvPjrtAllocatorPreallocate;
+extern const char* const kEnvPjrtAllocatorFraction;
 
 }  // namespace env
 }  // namespace runtime

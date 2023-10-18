@@ -99,3 +99,5 @@ class autocast(torch.amp.autocast_mode.autocast):
 
   def __call__(self, func):
     return super().__call__(func)
+
+autocast = torch.cuda.amp.autocast

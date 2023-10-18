@@ -42,6 +42,7 @@ def _setup_default_env():
 
     if tpu.version() == 4:
       os.environ.setdefault('TPU_MEGACORE', 'megacore_dense')
+  os.environ.setdefault('PJRT_DEVICE', 'GPU')
 
 
 _fd, _tmp_fname = -1, ''

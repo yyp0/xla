@@ -13,6 +13,8 @@
 #include "torch_xla/csrc/runtime/util.h"
 #include "xla/client/xla_computation.h"
 #include "xla/literal.h"
+#include "xla/pjrt/distributed/client.h"
+#include "xla/pjrt/distributed/service.h"
 #include "xla/pjrt/pjrt_client.h"
 #include "xla/pjrt/pjrt_executable.h"
 #include "xla/shape.h"
@@ -99,6 +101,8 @@ class PjRtComputationClient : public ComputationClient {
 
  private:
   std::shared_ptr<xla::PjRtClient> client_;
+  std::shared_ptr<xla::DistributedRuntimeService> dist_runtime_service_;
+  std::shared_ptr<xla::DistributedRuntimeClient> dist_runtime_client_;
   // global_ordinals_ tracks a map from PjRtDeviceId to the device's
   // dense global ordinal.
   std::unordered_map<int, int> global_ordinals_;
