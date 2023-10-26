@@ -30,6 +30,7 @@ python_configure(
 # b) get the sha256 hash of the commit by running:
 #    curl -L https://github.com/openxla/xla/archive/<git hash>.tar.gz | sha256sum
 #    and update the sha256 with the result.
+'''
 http_archive(
     name = "xla",
     patch_args = [
@@ -48,6 +49,11 @@ http_archive(
     urls = [
         "https://github.com/openxla/xla/archive/51b59cfb1999c6f1b3ec59851675044b2c502aae.tar.gz",
     ],
+)
+'''
+local_repository(
+   name = "xla",
+   path = "./third_party/openxla",
 )
 
 # For development, one often wants to make changes to the OpenXLA repository as well
